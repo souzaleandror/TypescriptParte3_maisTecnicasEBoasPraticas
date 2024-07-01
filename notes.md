@@ -234,3 +234,204 @@ Introdução e estrutura do projeto
 Requisitos não funcionais
 Decorator de método
 Logar tempo de execução com decorator
+
+#### 01/07/2024
+
+@02-Decorators de métodos
+
+@@01
+Projeto da aula anterior
+
+Você pode ir acompanhando o passo a passo do desenvolvimento do nosso projeto e, caso deseje, você pode baixar o projeto do curso.
+Bons estudos!
+
+https://github.com/alura-cursos/typescript-curso-3/archive/44c27912c3e440ae39b64d0ebf3517460a5abf6b.zip
+
+@@02
+Decorator com parâmetro
+
+[00:00] Vamos voltar aqui para o nosso decorator. Tem o seguinte problema, não é um problema no nosso código, mas é um requerimento, tem desenvolvedor que quer ver o TempoDeExecucao em segundos, igual a nós fizemos, e tem desenvolvedor que quer ver o TempoDeExecucao em milissegundos. Eu não vou criar um logarTempoDeExecucao em segundos e logarTempoDeExecucao em milissegundos.
+[00:30] Vou passar o parâmetro para esse decorator que vai indicar para o desenvolvedor se ele quer ver milissegundos ou segundos. O padrão que vamos adotar é em milissegundos, que é o padrão. Eu vou dizer aqui que ele vai receber um parâmetro (emSegundos: boolean), só que eu quero que ele tenha um valor padrão, se você não passar esse parâmetro, volta aqui para o código, vou lá para o meu decorator.
+
+[01:15] Está dando erro de execução, porque eu sou obrigado a passar esse parâmetro, eu poderia tornar igual nós vimos nos cursos anteriores, tornar ele um parâmetro opcional, mas se eu tornar um parâmetro opcional, eu vou ter que testar dentro do meu código o valor dele, então eu vou usar um recurso que já tem no Java Script a bastante tempo, o valor padrão.
+
+[01:40] O valor padrão dele é false, salvei e volto lá para a negociação controller. Não estou passando parâmetro nenhum e o compilador TypeScript não está reclamando, ele não está reclamando, porque se você não passar esse parâmetro, ele vai adotar o valor false como padrão. Ele se integra com o Java Script e entende isso. E agora que eu tenho esse parâmetro, eu preciso planejar a minha lógica aqui dentro.
+
+[02:13] Dentro do meu descriptor eu preciso checar primeiro se eu vou usar segundos ou milissegundos e também quero trocar esse texto aqui para segundos ou milissegundos. Vou criar uma variável que chama let divisor = 1;, o padrão é milissegundos, então vou dividir por um, let unidade = ‘milissegundos’ e eu vou testar. Se é em segundos, o divisor vai ser 1000 e a unidade vai ser segundos.
+
+[03:07] E agora, na hora de exibir aqui, vou colocar aqui o meu divisor e aqui vai entrar a unidade, que é o meu valor. Eu ainda posso deixar o nosso código um pouco mais interessante, posso imprimir detalhes sobre o método, mas aí eu vou deixar isso para um outro decorator.
+
+[03:31] Nós vamos criar um decorator depois desse, um decorator de análise para saber o nome do método, parâmetros dos métodos, qual o retorno, mas o mais importante aqui é que agora dou essa opção para o desenvolvedor escolher o que ele quer.
+
+[03:45] Se ele quer exibir em segundos ou milissegundos e isso mostra para nós que eu posso passar parâmetros para um decorator. Vou salvar, voltar lá em negociação controller, esse aqui eu quero o padrão, mas o view.ts eu quero passar true, que vai ser em segundos. Então vou salvar, voltar lá no navegador, o update está mostrando em segundos.
+
+[04:26] Lembrando para nós não nos confundirmos e eu também não me confundir, que eu coloquei true, é porque eu quero que seja em segundos, porém o adiciona tem que ser em milissegundos. Então vou chamar agora aqui 15/11/1111, 2, colocou qualquer coisa e está lá, executou o adiciona mostrando o tempo de execução agora em milissegundos.
+
+[04:51] Isso mostra que um decorator pode receber parâmetros quantos parâmetros você quiser. Pode querer passar um objeto de configuração, se for o caso, não há limites aqui para o que você pode fazer. Agora para fixarmos isso, vamos para o próximo vídeo que vamos fazer um decorator que eu acho bem útil, ele vai analisar, vai escrutinar, verificar os dados do seu método. Vamos lá?
+
+@@03
+Esboço de um Decorator de método
+
+Rafaela deseja criar um decorator que, ao ser aplicado em um método, exibe no console a data na qual o método foi chamado. Contudo, se o decorator receber como parâmetro dd/MM/yyyy, deve exibir a data neste formato.
+Marque a opção que declara o esqueleto do decorator que Rafaela deseja criar:
+
+Selecione uma alternativa
+
+function logData(formato: string = '') {
+
+    return function(target: any, key: string) {
+         const metodoOriginal = descriptor.value;
+                 // aqui vem a lógica do decorator
+         return descriptor;
+    }
+}
+ 
+Alternativa errada! O último parâmetro é o descriptor, necessário para o decorator. Contudo, ele não foi passado como parâmetro.
+Alternativa correta
+function logData() {
+
+    return function(target: any, key: string, descriptor: PropertyDescriptor) {
+         const metodoOriginal = descriptor.value;
+                 // aqui vem a lógica do decorator
+         return descriptor;
+    }
+}
+ 
+Alternativa correta
+function logData(formato: string = '') {
+
+    return function(target: any, key: string, descriptor: PropertyDescriptor) {
+         const metodoOriginal = descriptor.value;
+                 // aqui vem a lógica do decorator
+         return descriptor;
+    }
+}
+ 
+Alternativa correta!
+
+@@04
+Criando um Decorator de inspeção
+
+[00:00] Nós criamos o primeiro decorator, o logarTempoDeExecucao, mas eu vou criar um outro que é bem útil para nós fixarmos o que aprendemos de decorator. Eu quero criar um decorator que não importa qual o método eu coloque, ele diga qual o nome do método, quais são os parâmetros do método e qual é o retorno do método. Então vamos criar um novo decorator que vou chamar de inspect.
+[00:47] Qual é a primeira coisa que fazemos dentro do decorator? Depois vou mostrar uma coisa bem legal. Vou criar uma função export function inspect, ele não vai receber parâmetro nenhum e ele tem que retornar return function target: any. Já falei sobre isso no outro vídeo, lembrando que se coloco esse decorator no método estático, o target vai ser a função constructor e se eu coloco no método que não é estático, método de instância, vai ser o prototype.
+
+[01:28] Por isso eu colocou any. O segundo parâmetro é o propertyKey: string, é o nome do método, e o famoso descriptor: PropertyDescriptor, que faz toda a mágica acontecer. Ele que tem referência do meu método e por ai vai. Qual é a ideia? Eu vou guardar o método original const metodoOriginal = descriptor.value, vou sobrescrever o meu descriptor. mas eu sei que no final return descriptor.
+
+[02:15] É bom, até quando você for criar o seu decorator, você já faz assim para não esquecer de dar o return descriptor. Agora vou dizer aqui no descriptor.value = function (...args: any), eu não sei quantos parâmetros esse método vai receber então vou usar o action operator e todo o parâmetro que você passar para ele vai ser do tipo any, porque parâmetro pode ser qualquer coisa e eu não sei qual parâmetro você quer colocar lá dentro.
+
+[02:55] Passei a minha função anônima para dentro dele e o que vamos fazer, primeira coisa é garantir a execução do método original, cons retorno = metodoOriginal.apply, porque quero executar o método original no contexto de this. This é o contexto da minha nova função que foi adicionada no value, por isso eu não posso usar arrow function, porque o this não vai variar, ele vai ser léxico e eu não quero isso.
+
+[03:30] Por isso tem que ser function aqui. Eu boto const retorno = metodoOriginal.apply(this, args); e aqui eu vou dar return retorno, está aqui o meu decorator e esse aqui é o esqueleto perfeito. Pego o meu método, pego o retorno, passo para ambos e retorno, pode até usar como template para qualquer decorator que você fizer, só que agora eu vou começar a colocar no espectro o seguinte, vou dar um console.log(‘--- Método ${propertyKey}‘).
+
+[04:32] Vou colocar agora console.log (‘------ parâmetros: ${JSON.stringfy(args)}’)_, agora vou fazer o retorno e eu sei o retorno, vou dar console.log(‘------ retorno: ${JSON.stringfy(retorno)}’). Então chamei o método, eu vou saber qual o nome do método que eu estou chamando, quais são os parâmetros e qual é o retorno. inspect não recebe parâmetro nenhum.
+
+[05:56] Agora nós vamos testar o nosso decorator e vou até fazer uma coisa para vocês verem, eu coloquei esse decorator no update. Vou colocar dois decorators e vamos ver o que acontece, vou colocar o inspect(), fiz isso e vou lá para cima, porque ele fez o auto import e se você não fez o auto import ou não funcionou, esse é o import que fazemos.
+
+[06:31] Se certifica que esse cara tem js no final. Então, olha que legal, primeiro criei um decorator com a mesma estrutura do anterior, só que vai me dizer quais são os parâmetros, qual o retorno, etc., e eu coloquei junto com o outro decorator, então vamos voltar lá no nosso código.
+
+[06:49] Vou executar aqui, recarreguei, Método Update, quais são os parâmetros do update? Olha que legal o que aconteceu aqui, vai ter um vídeo só para isso, eu coloquei dois decorators e o que acontece quando eu coloco dois decorators? Então eu vou explicar isso no próximo vídeo para ficar mais claro e não precisarmos correr. Quem é executado primeiro? O que acontece?
+
+@@05
+Ordem de execução dos Decorators
+
+[00:00] Vamos analisar com calma a ordem de execuções do decorator. Eu vou voltar lá no meu navegador e quando eu executo o meu navegador, quem eu vejo imprimindo console, foi o meu inspect. Quando o meu inspect acabou, antes do meu inspect fazer o retorno, porque o retorno está aqui, o Método Update não retorna nada e olha aqui os parâmetros que ele está recebendo.
+[00:29] Antes dele retornar o retorno do meu inspect ele delegou para o outro decorator que executou o código e viu quantos milissegundos terminou e quando acabou, voltou para o decorator anterior. Então o que está acontecendo é o seguinte, se eu volto lá para o meu decorator, a resposta é simple, vem o @inspect() primeiro e o @logarTempoDeExecução(true) como segundo, mas eu quero explicar um pouco mais para vocês.
+
+[00:55] Então o que eu vou mostrar aqui é no inspect.ts. Quando o meu inspect é executado, eu modifico e ele vai executar esse cara e vai chamar o método original, porém o método original já está com decorator. O decorator foi aplicado nele, que é o segundo decorator, então eu estou executando esse código, disparando o outro decorator e esse decorator fica suspenso aguardando o método ser retornado.
+
+[01:29] E depois exibe o retorno, então a ordem é primeiro @inspect() e segundo @logarTempoDeExecução(true) mas na hora dele modificar a classe, ele modifica primeiro @logarTempoDeExecução(true), aplica esse decorator no método e esse método está decorado, depois ele vai decorar esse método com o @inspect(), então ele primeiro modifica o método.
+
+[01:57] Primeiro método a ser modificado, o update vai ser modificado com decorator @logarTempoDeExecução(true), depois ele vai ser modificado com @inspect(). Ou seja, quando o inspect rodar, ele vai estar rodando, porque ele vai ser o primeiro, mas ele vai estar rodando na hora de processar sobre o método que já foi decorado com @logarTempoDeExecução(true), então você pode adotar aqui se eu voltar para cá, o primeiro está sendo o @inspect.
+
+[02:24] Faz sentido porque se eu quero @logarTempoDeExecução pode ser que eu queira também @logarTempoDeExecução em considerando um @inspect dentro dele. Então eu movi aqui o decorator, salvei, nós vemos aqui que ele executou o @inspect e no final ele logou, você pode estar pensando: “Flavio, mas quem foi executado primeiro foi o inspect”, não foi não, gente.
+
+[02:53] Se eu voltar no @logarTempoDeExecução e colocar aqui um console.log(‘Inicio logar tempo de execução’) na hora da chamada dele, salvei e volto lá para o navegador. Nós vemos que quem foi chamado primeiro foi o @logarTempoDeExecução, aí delegou para o inspect e quando o inspect acabou de retornar, ele voltou o controle para o meu decorator e eu imprimi o tempo de execução, então faz sentido para mim.
+
+[03:36] Deixa eu voltar lá no @logarTempoDeExecução, então fica a ideia de que os decorator são executados na ordem, o primeiro e depois vem o segundo, porém, internamente, o que o Java Script vai fazer é primeiro vai aplicar o *decorator, vai fazer o replace do último, depois desse cara com replace ele vai fazer o replace pelo de @logarTempoDeExecução, é por isso que na hora que eu estou executando a execução o inspect é disparado.
+
+[04:10] Então, é isso, galera. Então vai cair lá no exercício e vai perguntar qual é a ordem de execução dos tempos do decorator, é primeiro de cima para baixo e eu posso combinar decorators aqui como vocês puderam ver. Então vamos continuar porque tem mais coisa de decorator para vermos.
+
+@@06
+Qual a ordem?
+
+Marque a alternativa correta a respeito da ordem de aplicação dos decorators.
+
+Serão aplicados aleatoriamente.
+ 
+Alternativa correta
+Serão aplicados do topo para baixo.
+ 
+Alternativa errada! Pois na verdade eles são executados do topo para baixo e não aplicados.
+Alternativa correta
+Serão aplicados de baixo para o topo.
+ 
+Alternativa certa! Sim os decorators são aplicados de baixo para cima dentro do JS.
+
+@@07
+Simplificando o Decorator
+
+[00:00] Bom, galera. Olha só, eu vendi o peixe para vocês que ao construir o decorator, primeiro nós criamos essa função e retorna uma outra função que tenha a declaração do meu decorator. Só que, seguinte, eu gosto de fazer assim porque eu nunca sei se o meu decorator no futuro vai receber parâmetro ou não, mas se você tem um decorator que não recebe parâmetro, olha o que eu posso fazer.
+[00:35] Tirei o bloco, vou retornar e fazer o export function inspect, vou aumentar o espaço para vocês poderem ver, eu agora estou exportando direto a função que é o meu decorator, eu não tenho aquela função de fora. Aquela função externa é para que você possa passar parâmetros para o seu decorator, porque se nós olhamos no logarTempoDeExecucao através do closer do Java Script.
+
+[01:16] Se eu passo um parâmetro aqui nessa função e retorno uma outra função, essa outra função vai lembrar o parâmetro passado para essa função, então se eu salvo agora e olho lá no meu terminal, vai ter um erro lá em view. Se eu coloco em view, ele está dizendo que esse inspect não está rolando, porque esse cara agora não me retorna uma função do decorator quando eu chamo, não preciso chamá-la.
+
+[01:50] Então esse cara já é a função do decorator, eu não preciso chamar. Estou passando a função direto, eu só chamo aqui se eu quiser passar parâmetro para o decorator que eu vou retornar. Aqui eu não estou passando parâmetro nenhum e estou retornando o decorator direto, então aqui não vai dar certo se eu abrir e fechar parênteses.
+
+[02:15] Eu vou salvar aqui, o código rodou, volto para o navegador, ele continua funcionando que é uma maravilha. Um monte de decorator aqui, um monte de coisa que ele fez aqui para nós. Mas, olha só, eu fiz isso para mostrar para vocês, mas a minha sugestão é cria o decorator. Eu faço assim, eu tento até copiar o angular faz com os decorators dele.
+
+[02:47] Como você não sabe se você vai receber parâmetro ou não futuro, cria wraper mesmo que não receba parâmetro nenhum, que retorna a função do decorator, mas se você for purista, você fala: “Não, Flavio, eu nunca vou receber um parâmetro desse decorator”, você retorna direto a função com o nome inspect e na hora de aplicar esse decorator, você não vai abrir e fechar os parênteses.
+
+[03:15] Você vai chamar assim @inspect. Um outro motivo que eu gosto de criar sempre o wraper é que você garante que todos os decorators, você vai obrigar o desenvolvedor a abrir e fechar o parênteses, não fica essa coisa destoante que um eu passo parâmetro e outro não passa e por aí vai.
+
+[03:30] Eu só estou mostrando isso aqui caso você se depare com esse código e veja: “Ah, mas eu não vou receber parâmetro nenhum?”, você pode fazer desse jeito também. Então, vamos lá continuar.
+
+@@08
+Escapando texto através de Decorator
+
+[00:00] Bom, galera, mais uma coisa aqui ainda em relação ao decorator. Eu estou rolando o @logar com o @inspect, depois eu removo esses decorators, vai chegar uma hora que vou ter tanto decorator que vou remover alguns, senão vai ficar muita saída no console.
+[00:19] Mas uma coisa eu quero mostrar para vocês que o decorator pode ser utilizado, se nós voltarmos lá para um exercício que nós fizemos, um code que nós escrevemos no exercício anterior, era o seguinte, a minha view pode receber um parâmetro opcional, escapar? true ou false, para que ela realize o escape do texto do template antes de ser atribuído para o innerHTML do meu elemento.
+
+[00:47] Nós fizemos isso por uma questão de segurança para remover a tag script e eu posso ligar e desligar isso. Eu coloquei esse código dentro da minha view, mas eu posso também querer fazer esse escape em outros lugares. E, mais, eu posso tentar deixar o código da minha view mais claro, isolando essa lógica de escape em um decorator.
+
+[01:13] Eu vou criar com vocês aqui um decorator e vou chamar de escape.ts, então essa é a hora de nós fazermos uma revisão. Vou criar um decorator sem a aquele wraper, vou retornar o decorator direto, então como é que eu faço? export function escape, essa função vai receber três parâmetros.
+
+[01:42] O target: any, o propertyKey: string e descriptor: PropertyDescriptor. Primeira coisa que vou fazer é guardar o método original, porque tenho que chamar esse método, metodoOriginal = descriptor.value; descriptor.value = function (... args: any[]), o args vai ser do tipo any. Eu sei que no final eu tenho que retornar return descriptor. E o que vou fazer aqui?
+
+[03:09] Vou pegar o retorno, const retorno = metodoOriginal.apply(this, args);, vou chamar o método original, usar a receita de bolo do apply, vou passar o this que é a instância que está executando o meu método no momento, e os parâmetros para esse método. No final vou fazer um retorno.
+
+[03:44] Eu vou transformar esse cara para let retorno = metodoOriginal.apply(this, args) e antes de retornar esse cara, eu vou verificar primeiro se ele e uma string porque não faz sentido eu fazer o escape em algo que não é string.
+
+[03:53] Se você colocar esse decorator no método que retorna um objeto ou um número, vai dar problema, então vou fazer um if (typeof retorno === ‘string’), vou testar se ele é do tipo string. Vamos voltar lá para a view, vou copiar a nossa expressão regular. Eu executei o metodoOriginal e peguei o retorno, mas antes de eu fazer o método retornar ao meu método que eu modifiquei aqui, vou testar, é uma string?
+
+[04:57] O typeof é string? É, se for, eu estou dizendo que o retorno vai receber ele aplicando a expressão regular e eu vou e retorno com escape. Vou colocar aqui um console.log(‘@escape em ação na classe ${this.constructor.name ’}, será que com as informações aqui tem como saber qual a classe que está executando isso? Tem. This é a instância, a classe que tem o método decorado, eu sei o nome da classe através disso aí.
+
+[05:48] Isso aí já não é TypeScript, é Java Script, se eu tenho objeto e coloco .constructor.name, eu consigo pegar o nome da classe aqui. Escape em ação na classe ${this.constructor.name} para o método ${propertyKey}, então ele vai exibir aqui. Eu posso quebrar isso e ele não vai reclamar, porque é uma template string.
+
+[06:23] Então está aí o meu decorator, vou salvar, nenhum erro de compilação, vou fechar aqui para vocês poderem ver o código na íntegra para meditar e ver se faz sentido. Vou agora lá para view.ts, vou ter que remover esse código todo, vou remover o prive.escapar, vou remover esse parâmetro opcional. Vou remover esses outros códigos.
+
+[07:01] Vou salvar, sei que tenho um erro de compilação, porque lá no controller eu estou passando o parâmetro, se eu for lá no controller do NegociaçõesView eu quero realizar o escape, mas eu não recebo mais esse cara como parâmetro, removo aqui, meu código está compilando. Está rodando, nenhum erro de compilação.
+
+[07:48] Nós tínhamos combinado no curso anterior que apenas as NegociaçõesView que vai fazer o escape, então vou lá em NegociaçõesView. Eu não vou colocar em view, porque se não vai aplicar para todo mundo, eu quero poder ser seletivo, para NegociaçõesView eu quero que ele faça o escape no método template. Então vou colocar aqui `@escapar.ts`, vou salvar o nome em português para ficar mais fácil.
+
+[08:32] Então agora eu vou chegar no método e para essa classe faz sentido eu fazer o escape. Salvei, nenhum erro de compilação aqui, tudo rodando e volto para o navegador. Quando nós rodamos a aplicação pela primeira vez, lembrando que o NegociaçõesView , se voltarmos lá para o nosso código, Negociacao.controller, logo no constructor eu chamo o update de NegociaçõesView, então é por isso que ele fez lá escape em ação na classe NegociaçõesView para o método template.
+
+[09:16] Então eu consigo também extrair esses códigos que eu quero utilizar em outros lugares e evitar ficar poluindo o meu código com código de repetição e agora eu posso usar esse @escapar em qualquer método que retorne uma string. Vou deixar aqui no escapar.ts de novo e vamos continuar, já pegaram a ideia de que o decorator é muito poderoso?
+
+[09:40] É por isso que angular utiliza muito decorator no framework para livrar o desenvolvedor lá do código, ter que escrever esses códigos que não fazem sentido dentro daquele método. Hora eu quero que ele se comporte de um jeito, hora quero que se comporte de outro, então eu posso utilizar o decorator. Então vamos lá continuar.
+
+@@09
+Faça como eu fiz
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxi
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@10
+O que aprendemos?
+
+Nesta aula, aprendemos:
+Decorator com parâmetro
+Criação de um decorator de inspeção
+Ordem de execução dos decorators
+Simplificação no design de decorators
+Portabilidade de funcionalidade antiga para decorators
