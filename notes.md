@@ -435,3 +435,218 @@ Criação de um decorator de inspeção
 Ordem de execução dos decorators
 Simplificação no design de decorators
 Portabilidade de funcionalidade antiga para decorators
+
+#### 03/07/2024
+
+@03-Decorator de propriedade
+
+@@01
+Projeto da aula anterior
+
+Você pode ir acompanhando o passo a passo do desenvolvimento do nosso projeto e, caso deseje, você pode baixar o projeto do curso.
+Bons estudos!
+
+https://github.com/alura-cursos/typescript-curso-3/archive/e5edcbb8bcc8f042683aab30821bdcfd8dbf65aa.zip
+
+@@02
+Evitando código duplicado mais uma vez
+
+[00:00] Bom, pessoal, vamos lá continuar. Eu quero fazer uma coisa bem legal aqui com vocês, mas, primeiro, para evitarmos ficar poluindo o nosso console.log, vamos remover aqui pelo menos de view.ts, tenho @inspect, vou remover desse cara aqui esses dois decorators, só para não ficar poluindo no console.log porque eu posso querer olhar outra coisa no console.log.
+[00:26] Então já estamos usando, vou colocar o @inspect, pego esse aqui, salvei, vou lá em negociacao-controller.ts onde tenho o adiciona e vou colocar o @inspect aqui, vou importar, cuidado na hora de importar, vai lá em cima e veja se ele colocou o .js. Para que a gente dispare o @inspect e o @logarTempoDeExecucao só na hora de eu clicar aqui no adiciona ou para evitar ficar poluindo o console.log.
+
+[01:02] Essa que é a ideia. Deixa eu voltar lá no navegador, recarreguei. Nós estamos tendo a mensagem do escape que está em ação, que é o escape que a gente colocou na nossa view, esse pode ficar, não há problema. Deixa eu colocar qualquer coisa aqui, cliquei para incluir e está lá mostrando o tempo de execução do meu método e está mostrando aqui o escape em ação.
+
+[01:31] Esse do escape em ação eu vou remover esse comentário também, vou lá em escapar.ts, console.log @escape em ação, vou comentar isso aqui só para evitar ficar poluindo o meu console.log. Vou voltar lá para o meu navegador, recarreguei a minha página, não tenho mensagem nenhuma, está limpo.
+
+[02:02] Coloco para incluir, o adiciona tem o meu decorator inspect, não recebe parâmetro nenhum, o retorno não retorna nada e eu tenho o tempo de execução. Dei uma limpada aqui, por quê? Nós vamos agora melhorar a nossa aplicação nesse sentido. Dentro do controller, nós vimos que se eu tiver 15 campos no meu formulário, eu vou ter que repetir essa linha document.querySelector quinze vezes para pegar o elemento do don.
+
+[02:37] Eu vou ter que ficar poluindo o meu construtor toda hora para ficar obtendo lá dentro. Então qual a sacada que eu quero ver aqui, como pegar elementos no formulário é uma coisa muito corriqueira, quero simplificar isso. Está vendo o meu inputData, vou colocar aqui @DomInject.
+
+[03:05] Esse cara não existe, mas é um cara que eu vou criar e vou passar aqui @domInject (‘#data’). Vou chegar por quantidade, passa o seletor da quantidade que é (‘#quantidade’), vou agora no imputValor, é @domInject (‘#valor’).
+
+[03:35] Eu posso fazer assim e olha isso aqui o que vai acontecer, a ideia que eu quero. Se você olhar esse código, qual é a semelhança desse decorator que nós tínhamos com o anterior? É @at no início, mas se olharmos, eu estou criando um decorator que nós sabemos que por debaixo dos panos vai ter que ir lá no elemento do dom e buscar o elemento do dom com a ID data e fazer uma mágica para esse valor aparecer no meu input.
+
+[04:05] É um decorator que eu estou colocando em cima de propriedade da minha classe, não é um decorator de método. Então o que eu quero mostrar para vocês é que podemos criar decorator de propriedade e nós podemos fazer uma aplicação muito elegante, muito bacana que é essa de garantir que os meus elementos do dom, ao invés de ficar a cada linha colocar document.querySelector, fazer o cash e etc.
+
+[04:33] Irei criar um decorator que toda vez que esse input for acessado, ele entende que por debaixo dos panos ele precisa ir lá pegar o elemento do dom, baseado com esse ID e colocar aqui para dentro. Então nós ficamos com uma programação mais declarativa, não fico repetindo esse código tedioso de ficar document.querySelector e etc.
+
+[04:53] Você vê que o código fica até sexy, porque o constructor aqui está limpo, não preciso em nenhum momento mostrar para você que eu estou indo lá dom e buscando esse cara. Simplesmente levanto o braço e falo assim: “Eu quero o inputData”, de onde ele vai vir, não importa, só sei que vai vir um cara do dom que tem o ID data.
+
+[05:15] Aqui também grito, levanto a mão e falo: “Eu quero o inputQuantidade”, esse cara vai vir do além, onde é esse além? Nós sabemos, do nosso decorator, mas isso vai remover de novo grande parte de termos que lidar com essa questão de ficar buscando elemento do dom. Então é nesse capítulo que iremos trabalhar com decorator de propriedade, ele é um pouco diferente do decorator de método.
+
+[05:40] Mas os princípios são basicamente os mesmos. Vamos lá, galera, vamos fazer isso que é bem legal. Eu vou deixar o código aqui não compilando, vou desfazer o que eu fiz, porque se não vai ficar muito erro de compilação. O @inspect fica, então está o código do jeito anterior e agora sim vou para o próximo vídeo e vou fazer esse decorator com 
+
+@@03
+Criando nosso próprio DOM Injector
+
+[00:00] Vamos lá agora implementar nosso decorator, nosso domInjector, um decorator de propriedade. Vamos lá dentro dos decorators, vou criar o arquivo dom-injector.ts. Primeira coisa que iremos fazer na hora de criar esse decorator, sabemos que ele precisa receber um parâmetro e já vimos praticando com decorator de método como fazemos para passar parâmetro para um decorator.
+[00:29] Precisamos daquela função wraper, então vou começar com export function domInjector(seletor: string) e está aí, agora eu preciso programar esse cara, como era a estrutura anterior? Vamos mostrar aqui para vocês, ao abrir o escapar.ts, nosso decorator recebe como parâmetro target, propertyKey e o descriptor para podermos sobrescrever o método.
+
+[01:17] Poder gravar por cima do método original da classe, mas aqui eu não quero gravar sobre método original nenhum, então não vou utilizar esse cara. Então a minha função decorator que vou retornar vai ser return function(target: any, propertyKey: string), é o atributo no qual o decorator por colocado.
+
+[01:56] Se eu colocar o meu decorator sobre inputData, esse cara vai vir com inputData, ficou claro? Então temos aqui, estou retornando decorator que não faz nada, mas o mais importante é que se eu for usar esse decorator, vou fazer @domInjector(‘element’) e ele ao ser chamado vai me retornar a minha função decorator.
+
+[02:27] Que recebe como parâmetro target e propertyKey. Somente corrigindo aqui, é domInjector. Então temos aqui a nossa wraper ou factory de decorator. O primeiro parâmetro é o target, segundo a propertyKey. O target é bem parecido com a regra do decorator que que vimos passada, esse target se for colocado em propriedade estática de uma classe, nós somente trabalhamos com métodos estáticos.
+
+[03:15] Nós ainda não viu propriedade estática de uma classe, algo que eu vou mostrar para vocês, mas não agora. Mas se você coloca esse cara em uma propriedade estática de uma classe, esse cara vai te retornar uma função construtora dessa classe. Se eu coloco esse meu decorator em uma propriedade que não é estática, como uma de negociacao-controller, ele vai me retornar o prototype dessa classe.
+
+[03:32] Então a coisa para pensarmos aqui é nós não termos uma referência para a instância da classe negociacao-controller, pode até esquecer essa regra daqui que te falei, mas só coloca na sua cabeça que nesse decorator, nesse domInjector que fizemos, quando formos programar nosso decorator, nós não temos acesso a instância de negociacao-controller e isso é um problema
+
+[04:00] Porque se eu não tenho acesso a uma instância, como que vou lá buscar o elemento no dom e atribuir o valor a propriedade que tenho aqui? Preciso ter uma instância, mas nem com reza forte você vai ter essa instância aqui no seu decorator, por isso que precisamos usar aqui um jogo de cintura que vou mostrar para vocês no próximo vídeo.
+
+@@04
+Criando getters dinamicamente
+
+[00:00] Então, galera, vamos lá para nós entendermos o problema aqui de novo. Uma revisão, tenho o meu decorator na propriedade inputData e eu quero que meu decorator vá no dom, encontre elemento do dom e coloque diretamente no inputData para mim. Nós criamos o nosso decorator de propriedade, que é chamado domInjector que recebe um parâmetro seletor.
+[00:21] Que vai retornar para nós um decorator, porém esse decorator, o target, não é a instância de negociacao-controller e eu preciso de uma instância de negociacao-controller para quando buscar o elemento do dom, eu poder atribuir nessa propriedade. Porém, falei no vídeo anterior que nem com reza forte aqui nesse decorator você vai ter uma referência para essa instância.
+
+[00:57] Vamos usar artifícios aqui do Java Script, porque Type Script é um super set do Java Script que vai nos ajudar. Vamos colocar a cabeça para funcionar. Se eu transformasse esse inputData em um getter, significa que no momento em que você está acessando a propriedade pela primeira vez, vai estar disparando um acesso a essa propriedade e sei que se esse getter for executado, é porque está sendo executado dentro de uma instância de negociacao-controller.
+
+[01:41] Lembrando sobre getter, que se eu vier dentro do modelo de negociação, nós utilizamos getter aqui para retornar o data, para retornar o volume, então getter é o lugar onde eu posso colocar código lá dentro, mas quem está usando essa propriedade vai achar que ela vai continuar sendo uma propriedade não getter. Vamos voltar para o domInjector e pensar comigo.
+
+[02:08] Eu tenho acesso ao prototype da classe, que tal se eu pegasse esse prototype que define a classe e transformasse a propertyKey, que é o nome da propriedade que o decorator tá em cima. Tanto isso é verdade que se eu fizer console.log (propertyKey), vou salvar e voltar no navegador, quando olhamos no console o propertyKey mostra exatamente qual é a propriedade no qual ele foi adicionado, então eu vou alterar o prototype.
+
+[02:46] Transformar essas propriedades que o meu decorator for aplicado em getter, porque quando o getter for acessado, eu sei que ele vai ser acesso durante a runtime. E se ele for acessado durante a runtime, eu tenho a instância da propriedade da classe, ficou claro?
+
+[03:01] Então vamos criar primeiro uma const getter = function(), para o contexto do this ser dinâmico, porque se eu usar arrow function aqui, o this não vai ser dinâmico, vai dar problema. Então eu vou fazer o seguinte, toda vez que alguém chamar essa função, vamos dar const elemento = document.querySelector(seletor);.
+
+[03:59] E vamos retornar ´returnelemento;. Ou seja, esse getter que eu criei, toda vez que você acessar a propriedade o qual você botou esse decorator, eu quero chamar esse getter. Então a grande questão agora é como é que eu pego esse getter que eu criei e sobrescrevo no prototype na classe negociacao-controller, porque o prototype da classe é o que define a classe
+
+[04:42] Então é isso que vamos ver no próximo vídeo e não tem mágica, nós vamos usar recursos do próprio TypeScript.
+
+@@05
+Utilizando Object.defineProperty
+
+[00:00] Vamos lá, galera, então como fazemos? Eu tenho meu getter aqui, quando o decorator for aplicado na propriedade da classe, eu quero transformar essa propriedade em um getter. Se eu tenho uma referência e eu sei que esse cara aqui é o prototype da classe, eu posso alterar.
+[00:13] Como é que eu faço isso? Vou pedir ajuda de Object.defineProperty(target, propertyKey), então nesse prototype que define a classe negociacao-controller e eu quero adicionar um getter para a propriedade propertyKey. Então eu estou dizendo que eu tenho que modificar o target e essa propriedade, mas o que tem colocar? Quem colocar um getter? Diz o nome do getter.
+
+[01:05] Aí você vai passar esse objeto e vai ter um get. Esse cara significa que é um getter. Aí eu vou dizer que esse get vai receber como valor o meu getter. Vamos lá, vamos refletir. Acho que assim fica mais claro pra nós podermos ler o código e entender.
+
+[01:33] Olha a malandragem aqui. Quando o meu decorator for aplicado, ele vai ser aplicado quando a minha classe for definida, a minha classe negociacao-controller. Não é em tempo de execução, na hora que ele está aplicando esse decorator lá na minha classe, o que ele vai fazer? Vou criar um método que busca o elemento do dom com base no seletor e retornar, uma função que eu chamei de getter.
+
+[02:06] Mas onde vou colocá-la? Como eu tenho acesso ao prototype da classe, o que define a classe, eu vou dizer ao Object.defineProperty para pegar esse prototype para essa propriedade e setar esse getter para mim. passa por cima dela, define esse getter.
+
+[02:24] Então isso significa que a propriedade agora lá inputData, inputQuantidade e inputValor, todas agora são getter e quando forem acessadas vão executar qual código? Esse que busca o elemento do dom. Aqui eu vou até colocar um console.log(‘buscando elemento do DOM com o seletor ${seletor} para injetar em ${propertyKey}’);.
+
+[03:25] Então eu que ver isso aqui, buscando elemento do DOM com o seletor tal para injetar em propertyKey. Será que vai funcionar? Vou salvar e ver se tem algum erro de compilação lá no código. Nenhum erro, volto ao navegador. Deu um problema aqui, deixa eu dar uma olhada aqui no meu código.
+
+[03:58] É porque eu tenho que remover. Claro, ele virou um getter agora, então esses caras daqui não vou usar mais, eu tenho que remover, não posso atribuir algo para um getter. E faz sentido, era esse o nosso objetivo inicial, não ter que definir esse código. Salvei, voltei lá no meu código.
+
+[04:22] Vamos em console.log, você vê que ele em nenhum momento disparou a execução do meu código, do meu decorator. Para ficar ainda mais claro, vamos colocar console.log(‘Modificando prototype ${target.constructor.name} e adicionando getter para a propriedade ${propertyKey}’);, então quando carregar a minha página, você só pode ver esse console.log, porque o decorator está sendo aplicado no momento em que a classe é definida.
+
+[05:43] E você só pode ver esse console.log que está quando efetivamente alguém acessar o meu getter. Faz sentido, então vou salvar e voltar para o navegador. Quando eu carrego a minha página está lá, Modificando prototype NegociacaoController e adicionando getter para a propriedade InputData. Ele fez isso para InputData, inputQuantidade e inputValor.
+
+[06:08] Ou seja, a minha classe foi modificada, o prototype dela foi modificado, mas ele ainda não buscou nada no dom, agora quando digitamos isso 11/11/1111 e quando eu clicar em incluir, não é a primeira vez que ele vai fazer lá em negociacao-controller, não é a primeira vez que ele vai acessar inputData.value e inputQuantidade.value, então é nesse momento que ele vai buscar o elemento do dom.
+
+[06:36] Cliquei e tudo funcionou. Olha aqui no console.log. Vemos “buscando elemento do DOM com o seletor #data para injetar em inputData”. Então, com isso, nós conseguimos criar um DOM injector, isso significa que eu não sou mais o responsável de ficar buscando esses elementos manualmente, eu deleguei para o meu decorator e ele fez isso para nós.
+
+[07:06] Então voltando para cá, o que eu vou fazer? Ainda não está 100%, eu vou no próximo vídeo revisar e deixar ainda melhor o nosso código. Então, vamos lá.
+
+@@06
+Analisando decorator de propriedade
+
+Segue o código de um decorator de propriedade:
+export function domInjector(seletor: string) {
+    
+    return function(target: any, propertyKey: string) {
+        console.log(`Modificando prototype ${target.constructor.name}
+             e adicionando getter para a propriedade ${propertyKey}`);
+
+        const getter = function() {
+            const elemento = <HTMLElement>document.querySelector(seletor);
+            return elemento;
+        }
+    }
+}
+COPIAR CÓDIGO
+Marque alternativa verdadeira sobre o código:
+
+Funciona como esperado.
+ 
+Alternativa correta
+Faltou aplicar o getter criado à propriedade definida pela variável propertyKey através de Object.defineProperty.
+ 
+Alternativa correta!
+Alternativa correta
+Há um erro de compilação.
+
+@@07
+Um problema não esperado
+
+[00:00] Então vamos lá, galera. Revisão rápida antes de eu mostrar uma coisa para vocês. Seguinte, criamos um domInjector, que é um decorator de propriedade, que recebe como parâmetro o ID do elemento do DOM, que eu quero que ele busque e atribua a propriedade inputData, inputQuantidade, imputValor.
+[00:17] Só que isso é completamente genérico, eu posso injetar qualquer elemento do DOM aqui. Por quê? Porque se eu tiver um formulário com quinze campos na minha tela, eu não quero ficar buscando esses caras aqui e deixar meu construtor grande, ficar tendo que programar isso.
+
+[00:32] Eu quero isolar isso em um único lugar. Aí para fazer isso nós criamos um decorator que é o domInjector. Esse domInjector recebe como parâmetro o ID do elemento que eu quero e me retorna o decorator de propriedade, que é um pouco diferente do decorator de método.
+
+[00:57] O decorator do método tem o descriptor, aqui eu não tenho esse descriptor. Qual é a ideia? Em que momento esse decorator é aplicado? Ele é aplicado assim que a sua classe é declarada. No momento de declaração da sua classe o TypeScript, gerando um código JavaScript, modifica sua classe para adicionar esse decorator.
+
+[01:19] Então é por isso que quando carregamos nossa página pela primeira vez eu enxergo logo de cara, sem interagir com os input do formulário, esse console.log dizendo que o prototype do meu alvo da classe no qual minha propriedade pertence vai ser modificado para adicionar um getter na propriedade que eu quero modificar.
+
+[01:49] Por que eu vou criar um getter? Porque a atribuição do elemento, o retorno do elemento lá para aquele input tem que ser em tempo de execução. Então, no final das contas, eu não estou atribuindo nada naquele input. Se você olhar aqui na lógica do nosso getter o que eu estou fazendo, é que toda vez que você acessar, eu retorno. Eu faço o document.querySelector e retorno o elemento do dom.
+
+[02:15] Sempre que você acessar essa propriedade. Depois de criar esse getter, como que eu faço para substituir lá no prototype da classe, na definição da classe, a propriedade original por um getter? Eu uso Object.defineProperty passando o target, o propertyKey, que é a propriedade que eu quero modificar e digo aqui para criar um getter, aí eu escrevo get: getter.
+
+[02:46] E ele pediu para você passar aqui getter ou qualquer nome, podia ter colocado aqui calopsita e aqui trocaria. Aí nós vimos, voltando lá para o navegador, vou recarregar, porque quando eu carrego a minha página eu vejo que e o prototype está sendo modificado.
+
+[03:07] Nesse momento eu tenho certeza de que minhas propriedades são getter e na hora que eu acesso esse cara, dou incluir, ele vai e buscando o elemento do dom com o selector e por aí vai. Só que isso está lindo, mas tem um detalhe. Vou limpar o console.log e não fiz o refresh na página.
+
+[03:27] Vou adicionar mais uma negociação aqui. Você viu que funcionou tudo uma maravilha, mas, olha só, toda vez que alguém acessar a propriedade inputQuantidade, inputValor e inputData, eu estou indo a cada momento lá no DOM e buscando esse cara toda hora.
+
+[04:00] No nosso código anterior nós só buscávamos uma única vez no construtor e não importa se eu adicionasse novas negociações, ele sempre acessava aquele elemento do dom. Aqui está uma maravilha, mas eu quero evitar isso. Não faz sentido eu ficar buscando esse cara toda hora, eu quero buscar esse cara só uma vez.
+
+[04:21] Então o problema é que nosso decorator não está levando em consideração o cache desse elemento do DOM. Então o que eu quero mostrar para vocês aqui é que em uma situação como essa é interessante nós implementarmos uma solução de cache, para quando o meu getter for chamado de novo, se ele já buscou aquele elemento, para ele não buscar de novo, ele usar o elemento cacheado.
+
+[04:43] Beleza, galera? Então é isso que vamos ver no próximo vídeo. É esse o problema que vamos resolver.
+
+@@08
+Aplicando cache decorator copy
+
+[00:00] Nós precisamos implementar um cache aqui. Como nós vamos implementar? Nós vamos utilizar Java Script puro aqui, reconhecimento de escopo. Qual é a ideia? Quando o meu decorator é chamado, ele vai criar essa função decorator e vai adicionar o getter.
+[00:21] A questão toda é o seguinte, o que eu vou fazer, fora do getter eu vou criar uma variável let elemento: HTMLElement | null = null; e dentro do meu getter eu vou fazer if (!elemento). Um HTMLElement porque eu tenho strict no checks ligado, mas aqui eu quero que ele aceite null. Eu quero que ele comece vazio.
+
+[01:16] Quero que ele aceite o tipo nulo ou eu posso deixar aqui esse cara, que o valor dele vai ser undefinded. Posso fazer um ou outro, vou deixar undefinded porque não tem problema nenhum. A questão toda é o seguinte, esse is (!elemento) eu testo e se ele tem um valor diferente de undefinded, diferente de null, diferente de zero, diferente de string em branco, esse cara vai ser verdadeiro.
+
+[01:44] Mas eu estou testando se esse cara é falso, por isso que eu usei exclamação. Se esse cara é falso, aí eu vou dizer que o elemento vai receber querySelector. Nós sabemos que esse cara pode ser nulo em algum momento, porque o querySelector pode retornar HTML ou null.
+
+[02:13] Aí no caso aqui eu vou fazer o caching, vou dizer que esse cara daqui é HTMLElement. Fazendo o casting do retorno de querySelector, eu digo que esse cara não vai mais retornar HTML e null, vai me retornar HTML. Eu desenvolvedor estou assumindo que esse cara nunca vai ser nulo, não quero me preocupar com isso.
+
+[02:37] Então peguei o elemento e olha que legal, se esse cara é diferente de elemento, eu busco ele. Senão, olha o que eu continuo, executo aqui o meu código e retorno. Faz sentido? Vamos olhar aqui comigo. Nós precisamos lembrar um pouco de escopo de Java Script.
+
+[02:58] Olha a sacada, vamos entender isso daqui. A função function é ela que vai criar o getter e vai aplicar o getter em Object.defineProperty, vai fazer isso uma única vez para cada propriedade. Como eu declarei essa variável no escopo da minha função do decorator, por uma questão de [ININTELIGÍVEL], de escopo de Java Script, meu getter que vai ser atribuído para o meu defineProperty vai sempre lembrar qual é o valor dessa variável que foi defina no escopo da função anterior.
+
+[03:52] Então eu estou utilizando o decorator, o momento de aplicação do decorator para fazer o cache de elemento. Para que toda vez quando o meu getter for chamado, ele vai testar, ele vai dizer que está acessando a propriedade pela primeira vez, tem elemento? Não, então busca para mim e retorna esse elemento.
+
+[04:16] Se eu acesso de novo o meu getter, como eu fiz essa atribuição para essa variável, quem vai estar mudando é essa daqui. Agora se eu chamo o meu getter de novo pela segunda vez, ele vai perguntar se tem elemento, tem, então retorna direto esse cara, você não precisa buscá-lo.
+
+[04:33] Então você vê que aqui para resolver essa questão de cache nós estamos usando o escopo de funções para garantir isso. Então será que funciona? Salvei. Deixa eu olhar aqui meu terminal, nenhum erro de compilação. Vou voltar no meu navegador. Executei.
+
+[05:05] Aplicou o prototype, agora eu vou apertar em incluir e buscou os elementos do dom. Certo, vou fazer um clear aqui no console, vou fazer de novo e ele não pode buscar o elemento do dom de novo, ele tem que usar o que está cacheado. Beleza, funcionou.
+
+[05:29] Então o que nós conseguimos agora, é com um pouco de músculo, de conhecimento de Java Script é entender que o meu decorator define o getter para aplicar na definição do prototype e esse decorator vai ser único para cada propriedade no qual eu coloquei o meu decorator.
+
+[05:55] Então o que eu fiz? Defini uma variável elemento no escopo da minha função do decorator e fiz o getter sempre consultar para ver se ele valor aqui já existe ou não. Ele sempre vai lembrar, é a questão da closure. Essa função vai lembrar o escopo da função pai.
+
+[06:14] Só que quando eu estou chamando o getter pela primeira vez, é claro, esse valor vai estar em branco, então eu vou lá buscar o elemento no dom, atribuo para essa minha variável e retorno esse cara. Se eu chamo por uma segunda vez, vai cair aqui no if.
+
+[06:30] Esse cara já foi definido? Já. Se foi definido, nem executa esse código, retorna o elemento que está cacheado aqui na propriedade elemento. Fechou, galera? Então, com isso, nós conseguimos criar um decorator versátil, performático e que vai esperar até o último momento para quando você acessar aquela propriedade para buscar o elemento do dom para saber se ele existe ou não e vai cachear esse cara.
+
+[06:55] Então, galera, era isso que eu queria mostrar para vocês em relação ao decorator de propriedade, como ele é bem poderoso, mas grandes poderes trazem grandes responsabilidades e nós precisamos combinar recursos da linguagem Java Script com Type Script para conseguir elaborar esse cara, que é o nosso domInjector.
+
+[07:15] Se você já viu angular.js, ela usa decorator para tudo que é lado, então eles devem usar artifícios parecidos.
+
+@@09
+Faça como eu fiz
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+Continue com os seus estudos, e se houver dúvidas, não hesite em recorrer ao nosso fórum!
+
+@@10
+O que aprendemos?
+
+Nesta aula, aprendemos:
+Como evitar código duplicado
+Decorator de propriedade
+Criação dinâmica de getters
+O uso de Object.defineProperty
+Cache de decorators
